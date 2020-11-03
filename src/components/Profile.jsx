@@ -1,14 +1,12 @@
-import React, {useContext} from 'react'
-import {StateContext} from '../context'
+import { useAuth0 } from "@auth0/auth0-react";
+import React from "react";
+import ProfileCard from "./ProfileCard";
 
-const Profile = (props) =>{
-    const [value, dispatch] = useContext(StateContext)
-    const {name} = value
-    return (
-        <div>
-            <h1>{name}'s profile</h1>
-        </div>
-    )
-}
 
-export default Profile
+const Profile = () => {
+  return (
+      <ProfileCard />
+  );
+};
+
+export default Profile;

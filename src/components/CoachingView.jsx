@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function CoachingView() {
-  const [value, dispatch] = useContext(StateContext)
+  const [value] = useContext(StateContext)
   const classes = useStyles();
   const {coachingnotes} = value.activeTM
   return (

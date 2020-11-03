@@ -17,14 +17,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function FactorSelector() {
+export default function FactorSelector(props) {
   const classes = useStyles();
-  const [talent, setTalent] = useState('');
-  const [value, dispatch] = useContext(StateContext)
+  let talent=""
+  const [value] = useContext(StateContext)
   const {talentCategories} = value
 
   const handleChange = (event) => {
-    setTalent(event.target.value);
+    props.getFactor(event.target.value)
   };
 
   return (

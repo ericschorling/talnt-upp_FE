@@ -1,39 +1,42 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { StateContext } from '../context'
-import DoneIcon from '@material-ui/icons/Done'
+import {useAuth0} from '@auth0/auth0-react'
 
 
 const HomeScreen = (props) => {
-    const [input, setInput] = useState('')
+    const serverUrl = process.env.REACT_APP_SERVER_URL;
+    const { user, isAuthenticated, getAccessTokenSilently} = useAuth0()
     const [value, dispatch] = useContext(StateContext)
-    const {name, company, spanishidden} = value
 
-    const _handleClick =()=>{
-        return dispatch({type:"CHANGE_SPAN", span:!spanishidden})
+    let email
+    if(isAuthenticated){
+        email = user.email
     }
-    const _handleNameUpdate=()=>{
-        return dispatch({type:"CHANGE_NAME", name:input})
-    }
-    const _handleInput=(input)=>{
-        setInput(input)
-    }
+
+    useEffect(()=>{
+        (async function () {
+            if (isAuthenticated){
+                const token = await getAccessTokenSilently()
+                const response = await fetch(
+                    `${serverUrl}/api/leader/${email}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        },
+                    }
+                )
+                const user = await response.json()
+                dispatch({type:"UPDATE_USER", user: user[0]})
+            }
+        })();
+    }, [dispatch]);
+    console.log(value.user)
     return (
         <div>
             <h1>
-                Welcome 
-                {
-                    spanishidden ? 
-                    <>
-                        <input type='text' onChange={(e)=>_handleInput(e.target.value)}></input>
-                        <button type='button' onClick={()=>_handleNameUpdate()}>
-                            <DoneIcon/>
-                        </button>
-                    </> : 
-                    <span onClick={()=>_handleClick()}>
-                         {name} 
-                    </span>
-                } 
-                to {company}
+                {`Welcome,  
+                ${value.user.name ? value.user.name : null},
+                to Talnt-Upp`}
             </h1>
         </div>
     )

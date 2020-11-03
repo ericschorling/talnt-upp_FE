@@ -18,7 +18,7 @@ export const initialState ={
         recognition: 3,
         coachingnotes: [
             {
-                enteringLeaderID: 1,
+                enteringLeaderID: 1,  
                 coachingDate: new Date(2020,3,4).toDateString(),
                 talentGroup: 'Safety',
                 notetype: 'Coaching',

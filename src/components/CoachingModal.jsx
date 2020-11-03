@@ -7,14 +7,14 @@ import { StateContext } from '../context';
 import Divider from '@material-ui/core/Divider'
 import FactorSelector from './FactorSelector';
 import Grid from '@material-ui/core/Grid'
+import IconButton from '@material-ui/core/IconButton'
+import Announcement from '@material-ui/icons/Announcement'
 
-function rand() {
-  return Math.round(Math.random() * 20) - 10;
-}
+const serverUrl = process.env.REACT_APP_SERVER_URL;
 
 function getModalStyle() {
-  const top = 50 + rand();
-  const left = 50 + rand();
+  const top = 50;
+  const left = 50;
 
   return {
     top: `${top}%`,
@@ -40,14 +40,18 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SimpleModal() {
+export default function CoachingModal(props) {
   const classes = useStyles();
   // getModalStyle is not a pure function, we roll the style only on the first render
   const [modalStyle] = useState(getModalStyle);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(props.modal);
   const [date, setDate] = useState('')
   const [value, dispatch] = useContext(StateContext)
-  const {name} = value
+  const [factor, setFactor] = useState('')
+  const [input, setValue] = React.useState('Controlled');
+
+
+  console.log(props.modal)
   const handleOpen = () => {
     setOpen(true);
   };
@@ -56,8 +60,7 @@ export default function SimpleModal() {
     setOpen(false);
   };
 
-  const [input, setValue] = React.useState('Controlled');
-
+  
   const handleChange = (event) => {
     setValue(event.target.value);
   };
@@ -71,17 +74,15 @@ export default function SimpleModal() {
 
   const _handleAddCoaching = async()=>{
       console.log(input, "clicked")
-      const newActive = {...value.activeTM}
-      newActive.coachingnotes = [...newActive.coachingnotes, {
-            enteringLeaderID: name,
-            coachingDate: date,
-            talentGroup: 'Safety',
-            notetype: 'Coaching',
-            note: input,}]
-      newActive.coaching += 1
-      await dispatch({type:"ADD_COACHING_NOTE", note: newActive})
-      console.log(value.activeTM.coachingnotes, value.activeTM.coaching)
       setOpen(false)
+      const requestOptions = {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({note: {teammember: props.tm, enteringleader: value.user.id, talentGroup:factor, notetype:'Coaching', note:input , date: date}})
+      }
+      const response = await fetch(`${serverUrl}/api/notes`, requestOptions)
+      const message = await response.json()
+      console.log(message)
   }
 
   const body = (
@@ -103,7 +104,7 @@ export default function SimpleModal() {
                     />
                 </Grid>
                 <Grid item xs={6}>
-                    <FactorSelector />
+                    <FactorSelector getFactor={setFactor}/>
                 </Grid>
                 <Grid item xs={12}>
                     <Divider />
@@ -137,20 +138,40 @@ export default function SimpleModal() {
       
     </div>
   );
-
-  return (
-    <div>
-      <Button type="button" variant="contained" color="primary" onClick={handleOpen}>
-        Coach
-      </Button>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        {body}
-      </Modal>
-    </div>
-  );
+  {switch(props.type){
+    case 'announcement':
+      return (
+          <>
+            <IconButton color="secondary" onClick={handleOpen}>
+                <Announcement  />
+            </IconButton>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                {body}
+            </Modal>
+          </>
+      )
+    case 'tmview':
+        return (
+            <div>
+                <Button type="button" variant="contained" color="primary" onClick={handleOpen}>
+                    Coach
+                </Button>
+                <Modal
+                    open={open}
+                    onClose={handleClose}
+                    aria-labelledby="simple-modal-title"
+                    aria-describedby="simple-modal-description"
+                >
+                    {body}
+                </Modal>
+            </div>
+        )
+    default : 
+      return <Button>Oops</Button>
+  }};
 }

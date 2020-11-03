@@ -1,8 +1,7 @@
-import React from 'react'
 
 
 const reducer = (state, action) => {
-    const {span,type,name, modal, note} = action
+    const {span,type,name, modal, note,tm, user} = action
     switch(type){
         case "CHANGE_SPAN":
             return {...state, spanishidden: span }
@@ -12,6 +11,10 @@ const reducer = (state, action) => {
             return {...state, coachingModal: modal}
         case "ADD_COACHING_NOTE":
             return {...state, activeTM:note }
+        case "UPDATE_ACTIVE_TM":
+            return {...state, activeTM:tm}
+        case "UPDATE_USER":
+            return {...state, user: user}
         default :
             return state
     }

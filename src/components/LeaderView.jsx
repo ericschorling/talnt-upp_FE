@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -25,14 +25,9 @@ import {testData} from '../testState'
 import Button from '@material-ui/core/Button'
 import Announcement from '@material-ui/icons/Announcement'
 import { StateContext } from '../context';
+import CoachingModal from './CoachingModal'
 
-function createData(name, department, coaching, step, recognition) {
-  return { name, department, coaching, step, recognition };
-}
-const rows = testData.teammembers.map(tm=>{
-    return createData(tm.name, tm.department, tm.coaching, tm.step, tm.recognition)
-})
-  
+
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -83,7 +78,7 @@ function EnhancedTableHead(props) {
             indeterminate={numSelected > 0 && numSelected < rowCount}
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all desserts' }}
+            inputProps={{ 'aria-label': 'select all team members' }}
           />
         </TableCell>
         {headCells.map((headCell) => (
@@ -145,7 +140,7 @@ const useToolbarStyles = makeStyles((theme) => ({
 const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
   const { numSelected } = props;
-
+  const [value] = useContext(StateContext)
   return (
     <Toolbar
       className={clsx(classes.root, {
@@ -158,7 +153,7 @@ const EnhancedTableToolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Team
+          {value.user.suporg[0]}
         </Typography>
       )}
         {/* These will need to have click events tied to them to get any actual changes. They refer to the delete and filter on the leader view */}
@@ -216,7 +211,44 @@ export default function LeaderView(props) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+  const [rows, setRows] = React.useState([])
+  function createData(name, tmNum, department, coaching, step, recognition) {
+    return { name, tmNum, department, coaching, step, recognition };
+  }
+  const getNotes = async(id)=>{
+    const response = await fetch(`${serverUrl}/api/notes/${id}`)
+    const notes = await response.json()
+    return notes
+  }
+  const serverUrl = process.env.REACT_APP_SERVER_URL;
+  
+  useEffect(()=>{
+    (async function () {
+        let therows= [];
+        const response = await fetch(`${serverUrl}/api/teammembers/${value.user.id}`, )
+        const teammembers = await response.json()
+        console.log(teammembers)
+        for (let tm of teammembers){
+            let coachingNotes=0;
+            let recognitionNotes =0;
+            let notes = await getNotes(tm.id)
+            console.log(notes)
+            notes.forEach(note=>{
+                if(note.notetype ==='Coaching'){
+                    coachingNotes+=1
+                }
+                if(note.notetype === 'Recognition'){
+                    recognitionNotes +=1
+                }
+            })
+            therows = [...therows, 
+                createData(tm.name, tm.id, tm.department, coachingNotes, tm.step, recognitionNotes)]
+        }
+        setRows(therows)
+        console.log(rows)
+    })();
+    console.log(rows)
+  },[]);
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -269,104 +301,103 @@ export default function LeaderView(props) {
 
   const emptyRows = rows.length <= 5 ? 5- rows.length  : 0;
 
-  const _handleCoachClick = (tm) =>{
-    dispatch({type:"UPDATE_ACTIVE_TM", activeTM: tm})
-  }  
   return (
     <>
         <div>
             <h1>Leader View</h1>
-            <h2>Team</h2>
+            <h2>{`${value.user.name}'s ${value.user.team} Team`}</h2>
         </div>
         <div className={classes.root}>
-        <Paper className={classes.paper}>
-            <EnhancedTableToolbar numSelected={selected.length} />
-            <TableContainer>
-            <Table
-                className={classes.table}
-                aria-labelledby="tableTitle"
-                size={dense ? 'small' : 'medium'}
-                aria-label="enhanced table"
-            >
-                <EnhancedTableHead
-                classes={classes}
-                numSelected={selected.length}
-                order={order}
-                orderBy={orderBy}
-                onSelectAllClick={handleSelectAllClick}
-                onRequestSort={handleRequestSort}
-                rowCount={rows.length}
-                />
-                <TableBody>
-                {stableSort(rows, getComparator(order, orderBy))
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row, index) => {
-                    const isItemSelected = isSelected(row.name);
-                    const labelId = `enhanced-table-checkbox-${index}`;
-                    console.log(row.name)
-                    return (
-                        <TableRow
-                        hover
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.name}
-                        selected={isItemSelected}
-                        >
-                        <TableCell padding="checkbox">
-                            <Checkbox
-                            onClick={(event) => handleClick(event, row.name)}
-                            checked={isItemSelected}
-                            inputProps={{ 'aria-labelledby': labelId }}
-                            />
-                        </TableCell>
-                        <TableCell component="th" id={labelId} scope="row" padding="none">
-                            {row.name}
-                        </TableCell>
-                        <TableCell align="right">{row.department}</TableCell>
-                        <TableCell align="right">
-                            <IconButton color="primary" onClick={()=>_handleCoachClick(row)}>
-                                <Announcement />
-                            </IconButton>
-                            {row.coaching}
-                        </TableCell>
-                        <TableCell align="right">{row.step}</TableCell>
-                        <TableCell align="right">
-                            <IconButton color="primary" >
-                                <AddComment/>
-                            </IconButton>
-                            {row.recognition}
-                        </TableCell>
-                        <TableCell align="right">
-                            <Button variant="contained" color="primary" href={`/team/${row.name}`}>
-                                TM View
-                            </Button>
-                        </TableCell>
+            <Paper className={classes.paper}>
+                <EnhancedTableToolbar numSelected={selected.length} />
+                <TableContainer>
+                <Table
+                    className={classes.table}
+                    aria-labelledby="tableTitle"
+                    size={dense ? 'small' : 'medium'}
+                    aria-label="enhanced table"
+                >
+                    <EnhancedTableHead
+                    classes={classes}
+                    numSelected={selected.length}
+                    order={order}
+                    orderBy={orderBy}
+                    onSelectAllClick={handleSelectAllClick}
+                    onRequestSort={handleRequestSort}
+                    rowCount={rows.length}
+                    />
+                    <TableBody>
+                    {stableSort(rows, getComparator(order, orderBy))
+                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        .map((row, index) => {
+                        const isItemSelected = isSelected(row.name);
+                        const labelId = `enhanced-table-checkbox-${index}`;
+                        console.log(row)
+                        return (
+                            <TableRow
+                            hover
+                            role="checkbox"
+                            aria-checked={isItemSelected}
+                            tabIndex={-1}
+                            key={row.name}
+                            selected={isItemSelected}
+                            >
+                            <TableCell padding="checkbox">
+                                <Checkbox
+                                onClick={(event) => handleClick(event, row.name)}
+                                checked={isItemSelected}
+                                inputProps={{ 'aria-labelledby': labelId }}
+                                />
+                            </TableCell>
+                            <TableCell component="th" id={labelId} scope="row" padding="none">
+                                {row.name}
+                            </TableCell>
+                            <TableCell align="right">{row.department}</TableCell>
+                            <TableCell align="right">
+                                {row.coaching}
+                                <CoachingModal type={'announcement'} tm={row.tmNum} />
+                            </TableCell>
+                            <TableCell align="right">{row.step}</TableCell>
+                            <TableCell align="right">
+                                {row.recognition}
+                                <IconButton color="primary" >
+                                    <AddComment style={{transform:"scaleX(-1)"}}/>
+                                </IconButton>
+                            </TableCell>
+                            <TableCell align="right">
+                                <Button 
+                                    variant="contained" 
+                                    color="primary" 
+                                    href={`/team/${row.name}`}
+                                >
+                                    TM View
+                                </Button>
+                            </TableCell>
+                            </TableRow>
+                        );
+                        })}
+                    {emptyRows > 0 && (
+                        <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                        <TableCell colSpan={6} />
                         </TableRow>
-                    );
-                    })}
-                {emptyRows > 0 && (
-                    <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                    <TableCell colSpan={6} />
-                    </TableRow>
-                )}
-                </TableBody>
-            </Table>
-            </TableContainer>
-            <TablePagination
-            rowsPerPageOptions={[5, 10, 25, 50, {value:200,label:'All'}]}
-            component="div"
-            count={rows.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onChangePage={handleChangePage}
-            onChangeRowsPerPage={handleChangeRowsPerPage}
+                    )}
+                    </TableBody>
+                </Table>
+                </TableContainer>
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25, 50, {value:200,label:'All'}]}
+                    component="div"
+                    count={rows.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onChangePage={handleChangePage}
+                    onChangeRowsPerPage={handleChangeRowsPerPage}
+                />
+            </Paper>
+            <FormControlLabel
+                control={<Switch checked={dense} onChange={handleChangeDense} />}
+                label="Dense padding"
             />
-        </Paper>
-        <FormControlLabel
-            control={<Switch checked={dense} onChange={handleChangeDense} />}
-            label="Dense padding"
-        />
         </div>        
     </>
   );
