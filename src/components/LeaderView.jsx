@@ -21,11 +21,11 @@ import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import AddComment from '@material-ui/icons/AddComment';
-import {testData} from '../testState'
 import Button from '@material-ui/core/Button'
-import Announcement from '@material-ui/icons/Announcement'
 import { StateContext } from '../context';
 import CoachingModal from './CoachingModal'
+import {Link} from 'react-router-dom'
+import Container from '@material-ui/core/Container'
 
 
 
@@ -153,7 +153,7 @@ const EnhancedTableToolbar = (props) => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          {value.user.suporg[0]}
+          {value?value.user.suporg[0]:null}
         </Typography>
       )}
         {/* These will need to have click events tied to them to get any actual changes. They refer to the delete and filter on the leader view */}
@@ -212,6 +212,7 @@ export default function LeaderView(props) {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([])
+  const [notes, setNotes] = React.useState([])
   function createData(name, tmNum, department, coaching, step, recognition) {
     return { name, tmNum, department, coaching, step, recognition };
   }
@@ -221,10 +222,12 @@ export default function LeaderView(props) {
     return notes
   }
   const serverUrl = process.env.REACT_APP_SERVER_URL;
-  
+  let therows= [];
+  let allNotes =[];
+
+
   useEffect(()=>{
     (async function () {
-        let therows= [];
         const response = await fetch(`${serverUrl}/api/teammembers/${value.user.id}`, )
         const teammembers = await response.json()
         console.log(teammembers)
@@ -232,7 +235,6 @@ export default function LeaderView(props) {
             let coachingNotes=0;
             let recognitionNotes =0;
             let notes = await getNotes(tm.id)
-            console.log(notes)
             notes.forEach(note=>{
                 if(note.notetype ==='Coaching'){
                     coachingNotes+=1
@@ -243,12 +245,16 @@ export default function LeaderView(props) {
             })
             therows = [...therows, 
                 createData(tm.name, tm.id, tm.department, coachingNotes, tm.step, recognitionNotes)]
+            allNotes = [...allNotes, notes]
         }
-        setRows(therows)
+        setNotes(allNotes)
         console.log(rows)
+        console.log(therows)
+        setRows(therows)
     })();
-    console.log(rows)
-  },[]);
+  },[setNotes, setRows]);
+
+
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -302,7 +308,7 @@ export default function LeaderView(props) {
   const emptyRows = rows.length <= 5 ? 5- rows.length  : 0;
 
   return (
-    <>
+    <Container maxWidth="lg">
         <div>
             <h1>Leader View</h1>
             <h2>{`${value.user.name}'s ${value.user.team} Team`}</h2>
@@ -332,7 +338,6 @@ export default function LeaderView(props) {
                         .map((row, index) => {
                         const isItemSelected = isSelected(row.name);
                         const labelId = `enhanced-table-checkbox-${index}`;
-                        console.log(row)
                         return (
                             <TableRow
                             hover
@@ -355,23 +360,23 @@ export default function LeaderView(props) {
                             <TableCell align="right">{row.department}</TableCell>
                             <TableCell align="right">
                                 {row.coaching}
-                                <CoachingModal type={'announcement'} tm={row.tmNum} />
+                                <CoachingModal setNotes={setNotes} type='Coaching' button={'announcement'} tm={row.tmNum} />
                             </TableCell>
                             <TableCell align="right">{row.step}</TableCell>
                             <TableCell align="right">
                                 {row.recognition}
-                                <IconButton color="primary" >
-                                    <AddComment style={{transform:"scaleX(-1)"}}/>
-                                </IconButton>
+                                <CoachingModal type='Recognition' button={'announcement'} tm={row.tmNum} />
                             </TableCell>
                             <TableCell align="right">
+                                <Link to={`/team/${row.name}`}>
                                 <Button 
                                     variant="contained" 
                                     color="primary" 
-                                    href={`/team/${row.name}`}
+                                    
                                 >
-                                    TM View
+                                    TM View 
                                 </Button>
+                                </Link>
                             </TableCell>
                             </TableRow>
                         );
@@ -399,7 +404,7 @@ export default function LeaderView(props) {
                 label="Dense padding"
             />
         </div>        
-    </>
+    </Container>
   );
 }
 

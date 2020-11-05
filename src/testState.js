@@ -1,9 +1,13 @@
 export const initialState ={
-    user: 1,
-    name: 'Eric',
-    team: 'Blue',
-    company: 'FM',
+    user: {
+        id: 1,
+        name: 'Fake',
+        team: 'Blue',
+        company: 'FM',
+        suporg:['Operations'],
+    },
     spanishidden: false,
+    rows: [],
     authorized:false,
     coachingVisible: false,
     coachingModal: false,

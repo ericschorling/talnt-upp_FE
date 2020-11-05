@@ -6,6 +6,7 @@ import NavBar from './components/NavBar';
 import {initialState} from './testState'
 import HomeScreen from './components/HomeScreen';
 import Profile from './components/Profile';
+
 import {Route} from 'react-router-dom'
 import LeaderView from './components/LeaderView';
 import TMView from './components/TMView';
@@ -17,9 +18,9 @@ function App() {
   const {isLoading} = useAuth0()
 
   return (
-    <div className="App">
 
       <StateProvider value ={useReducer(reducer, initialState)}>
+      
         <NavBar />
         {isLoading ?
         <Loading /> :
@@ -27,12 +28,10 @@ function App() {
           <Route exact path="/" component={HomeScreen} />
           <ProtectedRoute exact path='/profile' component={Profile} />
           <ProtectedRoute exact path='/leader_view' component={LeaderView} />
-          <ProtectedRoute path='/team/:tmName' component={TMView} />
+          <ProtectedRoute exact path='/team/:tmName' component={TMView} />
         </Switch>
         }
       </StateProvider>
-
-    </div>
   );
 }
 

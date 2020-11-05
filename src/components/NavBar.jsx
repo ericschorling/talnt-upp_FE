@@ -36,7 +36,6 @@ export default function NavBar() {
   const {isAuthenticated, logout} = useAuth0()
 
   const history = useLocation();
-  console.log(history)
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -50,7 +49,6 @@ export default function NavBar() {
     setAnchorEl(null);
   };
   console.log(isAuthenticated)
-
   return (
     <div className={classes.root}>
       <FormGroup>

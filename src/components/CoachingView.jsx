@@ -26,10 +26,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CoachingView() {
+export default function CoachingView(props) {
   const [value] = useContext(StateContext)
   const classes = useStyles();
-  const {coachingnotes} = value.activeTM
+  const {coachingnotes} = props
   return (
     <div className={classes.root}>
       <Accordion>
@@ -47,13 +47,13 @@ export default function CoachingView() {
                         <Paper key={index} style={{border:"1px solid rgba(0,0,0,0.12)"}}className={classes.paper}>
                             <Grid container justify="space-evenly" spacing={3} >
                                     <Grid item xs={4}>
-                                        Leader: {convo.enteringLeaderID}
+                                        Leader: {convo.enteringleader}
                                     </Grid>
                                     <Grid item xs={4}>
-                                        Date: {convo.coachingDate ? convo.coachingDate: null}
+                                        Date: {convo.date ? convo.date: null}
                                     </Grid>
                                     <Grid item xs={4}>
-                                        Perf. Factor: {convo.talentGroup}
+                                        Perf. Factor: {convo.talentgroup}
                                     </Grid>
                                     <Grid item xs={12}>
                                         <Divider />

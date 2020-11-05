@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function CoachingView() {
+export default function CoachingView(props) {
   const [value] = useContext(StateContext)
   const classes = useStyles();
   const {recognitionNotes} = value.activeTM
@@ -43,7 +43,7 @@ export default function CoachingView() {
         <AccordionDetails>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
-                    {recognitionNotes ? recognitionNotes.map((convo, index)=>(
+                    {props.recognitionNotes ? props.recognitionNotes.map((convo, index)=>(
                         <Paper key={index} style={{border:"1px solid rgba(0,0,0,0.12)"}}className={classes.paper}>
                             <Grid container justify="space-evenly" spacing={3} >
                                     <Grid item xs={4}>

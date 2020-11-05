@@ -9,6 +9,7 @@ import FactorSelector from './FactorSelector';
 import Grid from '@material-ui/core/Grid'
 import IconButton from '@material-ui/core/IconButton'
 import Announcement from '@material-ui/icons/Announcement'
+import AddComment from '@material-ui/icons/AddComment'
 
 const serverUrl = process.env.REACT_APP_SERVER_URL;
 
@@ -48,10 +49,8 @@ export default function CoachingModal(props) {
   const [date, setDate] = useState('')
   const [value, dispatch] = useContext(StateContext)
   const [factor, setFactor] = useState('')
-  const [input, setValue] = React.useState('Controlled');
+  const [input, setValue] = React.useState('');
 
-
-  console.log(props.modal)
   const handleOpen = () => {
     setOpen(true);
   };
@@ -78,22 +77,25 @@ export default function CoachingModal(props) {
       const requestOptions = {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({note: {teammember: props.tm, enteringleader: value.user.id, talentGroup:factor, notetype:'Coaching', note:input , date: date}})
+          body: JSON.stringify({note: {teammember: props.tm, enteringleader: value.user.id, talentGroup:factor, notetype: props.type, note:input , date: date}})
       }
       const response = await fetch(`${serverUrl}/api/notes`, requestOptions)
       const message = await response.json()
-      console.log(message)
+      console.log(message.length)
+      const response2 = await fetch(`${serverUrl}/api/allnotes`)
+      const allNotes = await response2.json()
+      props.setNotes(allNotes)
   }
 
   const body = (
     <div style={modalStyle} className={classes.paper}>
-      <h2 id="simple-modal-title">Enter Coaching Note</h2>
+      <h2 id="simple-modal-title">Enter {props.type} Note</h2>
       <form>
         <Grid container spacing={3} >
                 <Grid item xs={6}>
                     <TextField
                         id="date"
-                        label="Coaching Date"
+                        label={`${props.type} Date`}
                         type="date"
                         
                         className={classes.textField}
@@ -112,7 +114,7 @@ export default function CoachingModal(props) {
                 <Grid item xs={12}>
                     <TextField
                         id="outlined-multiline-static"
-                        label="Coaching Note"
+                        label={`${props.type} Note`}
                         multiline
                         rows={4}
                         defaultValue="Enter new note"
@@ -138,12 +140,30 @@ export default function CoachingModal(props) {
       
     </div>
   );
-  {switch(props.type){
+  {switch(props.button){
     case 'announcement':
-      return (
+      if(props.type === 'Coaching'){
+        return (
+            <>
+              <IconButton color="secondary" onClick={handleOpen}>
+                  {props.type==='Coaching'?<Announcement  />:null}
+              </IconButton>
+              <Modal
+                  open={open}
+                  onClose={handleClose}
+                  aria-labelledby="simple-modal-title"
+                  aria-describedby="simple-modal-description"
+              >
+                  {body}
+              </Modal>
+            </>
+        )
+      }
+      else {
+        return (
           <>
-            <IconButton color="secondary" onClick={handleOpen}>
-                <Announcement  />
+            <IconButton color="primary" onClick={handleOpen}>
+              <AddComment style={{transform:"scaleX(-1)"}}/>
             </IconButton>
             <Modal
                 open={open}
@@ -154,7 +174,8 @@ export default function CoachingModal(props) {
                 {body}
             </Modal>
           </>
-      )
+        )
+      }
     case 'tmview':
         return (
             <div>

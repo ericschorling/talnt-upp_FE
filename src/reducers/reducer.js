@@ -1,7 +1,7 @@
 
 
 const reducer = (state, action) => {
-    const {span,type,name, modal, note,tm, user} = action
+    const {span,type,name, modal, note,tm, user, rows} = action
     switch(type){
         case "CHANGE_SPAN":
             return {...state, spanishidden: span }
@@ -15,6 +15,8 @@ const reducer = (state, action) => {
             return {...state, activeTM:tm}
         case "UPDATE_USER":
             return {...state, user: user}
+        case "UPDATE_ROWS":
+            return {...state, rows: rows}
         default :
             return state
     }
