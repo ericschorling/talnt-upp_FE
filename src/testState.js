@@ -7,7 +7,7 @@ export const initialState ={
         suporg:['Operations'],
     },
     spanishidden: false,
-    rows: [],
+    allrows: [],
     authorized:false,
     coachingVisible: false,
     coachingModal: false,

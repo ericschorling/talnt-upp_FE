@@ -3,7 +3,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider'
 import CoachingModal from './CoachingModal'
@@ -29,10 +28,7 @@ const useStyles = makeStyles({
 export default function TMInfoCard(props) {
   
   const classes = useStyles();
-  const _handleClick = () => {
-    console.log('clicked')
-    //show a card with form to enter a coaching or recognition note
-    }
+
   const {activeTM, cNotes, rNotes} = props
 
   return (
@@ -61,17 +57,22 @@ export default function TMInfoCard(props) {
           Step: {activeTM.step}
         </Typography>
           <Divider />
-        
         </div>
       </CardContent>
       <CardActions>
         <Grid container justify="center" spacing={3}>
-            {/* <Grid item xs={6}> */}
-                <CoachingModal type={'Coaching'}button={'tmview'} tm={activeTM.id}/>
-            {/* </Grid> */}
-            {/* <Grid item xs={6}> */}
-                <Button variant="contained" color="primary" onClick={()=>_handleClick}>Recognize</Button>
-            {/* </Grid> */}
+          <CoachingModal 
+            updateRows={props.updateConvos} 
+            type={'Coaching'} 
+            button={'tmview'} 
+            tm={activeTM.id}
+          />
+          <CoachingModal 
+            updateRows={props.updateConvos} 
+            type={'Recognition'}
+            button={'tmview'} 
+            tm={activeTM.id}
+          />
         </Grid>
       </CardActions>
       

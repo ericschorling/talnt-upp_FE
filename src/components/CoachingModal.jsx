@@ -43,11 +43,10 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CoachingModal(props) {
   const classes = useStyles();
-  // getModalStyle is not a pure function, we roll the style only on the first render
   const [modalStyle] = useState(getModalStyle);
   const [open, setOpen] = useState(props.modal);
   const [date, setDate] = useState('')
-  const [value, dispatch] = useContext(StateContext)
+  const [value] = useContext(StateContext)
   const [factor, setFactor] = useState('')
   const [input, setValue] = React.useState('');
 
@@ -72,7 +71,6 @@ export default function CoachingModal(props) {
   }
 
   const _handleAddCoaching = async()=>{
-      console.log(input, "clicked")
       setOpen(false)
       const requestOptions = {
           method: 'POST',
@@ -81,10 +79,7 @@ export default function CoachingModal(props) {
       }
       const response = await fetch(`${serverUrl}/api/notes`, requestOptions)
       const message = await response.json()
-      console.log(message.length)
-      const response2 = await fetch(`${serverUrl}/api/allnotes`)
-      const allNotes = await response2.json()
-      props.setNotes(allNotes)
+      props.updateRows(props.tm)
   }
 
   const body = (
@@ -140,7 +135,7 @@ export default function CoachingModal(props) {
       
     </div>
   );
-  {switch(props.button){
+  switch(props.button){
     case 'announcement':
       if(props.type === 'Coaching'){
         return (
@@ -180,7 +175,7 @@ export default function CoachingModal(props) {
         return (
             <div>
                 <Button type="button" variant="contained" color="primary" onClick={handleOpen}>
-                    Coach
+                    {props.type}
                 </Button>
                 <Modal
                     open={open}
@@ -194,5 +189,5 @@ export default function CoachingModal(props) {
         )
     default : 
       return <Button>Oops</Button>
-  }};
+  };
 }
