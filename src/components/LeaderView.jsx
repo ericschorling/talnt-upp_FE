@@ -20,7 +20,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
-import AddComment from '@material-ui/icons/AddComment';
 import Button from '@material-ui/core/Button'
 import { StateContext } from '../context';
 import CoachingModal from './CoachingModal'
@@ -212,7 +211,6 @@ export default function LeaderView(props) {
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([])
-  const [notes, setNotes] = React.useState([])
   function createData(name, tmNum, department, coaching, step, recognition) {
     return { name, tmNum, department, coaching, step, recognition };
   }
@@ -225,10 +223,8 @@ export default function LeaderView(props) {
   let therows= [];
   let allNotes =[];
 
-
-  useEffect(()=>{
-    (async function () {
-        const response = await fetch(`${serverUrl}/api/teammembers/${value.user.id}`, )
+  const getRows = async () =>{
+    const response = await fetch(`${serverUrl}/api/teammembers/${value.user.id}`, )
         const teammembers = await response.json()
         console.log(teammembers)
         for (let tm of teammembers){
@@ -247,12 +243,15 @@ export default function LeaderView(props) {
                 createData(tm.name, tm.id, tm.department, coachingNotes, tm.step, recognitionNotes)]
             allNotes = [...allNotes, notes]
         }
-        setNotes(allNotes)
         console.log(rows)
         console.log(therows)
         setRows(therows)
-    })();
-  },[setNotes, setRows]);
+        
+  }
+
+  useEffect(()=>{
+    getRows()
+  },[ dispatch, setRows]);
 
 
   const handleRequestSort = (event, property) => {
@@ -360,22 +359,21 @@ export default function LeaderView(props) {
                             <TableCell align="right">{row.department}</TableCell>
                             <TableCell align="right">
                                 {row.coaching}
-                                <CoachingModal setNotes={setNotes} type='Coaching' button={'announcement'} tm={row.tmNum} />
+                                <CoachingModal updateRows={getRows} type='Coaching' button={'announcement'} tm={row.tmNum} />
                             </TableCell>
                             <TableCell align="right">{row.step}</TableCell>
                             <TableCell align="right">
                                 {row.recognition}
-                                <CoachingModal type='Recognition' button={'announcement'} tm={row.tmNum} />
+                                <CoachingModal updateRows={getRows}  type='Recognition' button={'announcement'} tm={row.tmNum} />
                             </TableCell>
                             <TableCell align="right">
-                                <Link to={`/team/${row.name}`}>
-                                <Button 
-                                    variant="contained" 
-                                    color="primary" 
-                                    
-                                >
-                                    TM View 
-                                </Button>
+                                <Link style={{textDecoration:"none"}} to={`/team/${row.name}`}>
+                                  <Button 
+                                      variant="contained" 
+                                      color="primary" 
+                                  >
+                                      TM View 
+                                  </Button>
                                 </Link>
                             </TableCell>
                             </TableRow>

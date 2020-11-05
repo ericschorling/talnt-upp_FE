@@ -17,14 +17,14 @@ export default function TMView() {
     const [cNotes, setCNotes] = useState([])
     const [value] = useContext(StateContext)
 
-    const getConversations = async (id) => {
-      const response = await fetch (`${serverUrl}/api/notes/${id}`)
-      const notes = await response.json()
-      let cNotes = notes.filter(note=>note.notetype === 'Coaching')
-      let rNotes = notes.filter(note=>note.notetype === 'Recognition')
-      setCNotes(cNotes)
-      setNotes(rNotes)
-    }
+  const getConversations = async (id) => {
+    const response = await fetch (`${serverUrl}/api/notes/${id}`)
+    const notes = await response.json()
+    let cNotes = notes.filter(note=>note.notetype === 'Coaching')
+    let rNotes = notes.filter(note=>note.notetype === 'Recognition')
+    setCNotes(cNotes)
+    setNotes(rNotes)
+  }
   useEffect(()=>{
       (async function(){
         const response = await fetch(`${serverUrl}/api/teammember/${tmName}`)
@@ -48,13 +48,13 @@ export default function TMView() {
             >
             <Grid container spacing={0}>
                 <Grid item xs={12}>
-                    <TMInfoCard activeTM={activeTM} rNotes={rNotes} cNotes = {cNotes}/>
+                    <TMInfoCard updateConvos={getConversations} activeTM={activeTM} rNotes={rNotes} cNotes = {cNotes}/>
                 </Grid>
                 <Grid item xs={12}>
-                    <CoachingView coachingnotes={cNotes} />
+                    <CoachingView  coachingnotes={cNotes} />
                 </Grid>
                 <Grid item xs={12}>
-                    <RecognitionView recognitionNotes={rNotes}/>
+                    <RecognitionView  recognitionNotes={rNotes}/>
                 </Grid>
             </Grid>
         </Typography>
