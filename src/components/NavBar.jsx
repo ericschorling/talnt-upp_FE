@@ -11,7 +11,7 @@ import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import {Link } from 'react-router-dom'
-import AuthenticationButton from './AuthenticationButton';
+import HomeIcon from '@material-ui/icons/Home';
 import {useAuth0} from '@auth0/auth0-react'
 import MenuBookIcon from '@material-ui/icons/MenuBook'
 
@@ -45,36 +45,10 @@ export default function NavBar() {
   console.log(isAuthenticated)
   return (
     <div className={classes.root}>
-      <FormGroup>
-        <FormControlLabel
-          control={
-            <Switch 
-                checked={isAuthenticated} 
-                onChange={()=>
-                    logout({
-                        returnTo:window.location.origin,
-                    })
-                } 
-                aria-label="login switch" 
-            />
-          }
-            label={isAuthenticated ? 'Logout' : 'Login'}
-        />
-      </FormGroup>
       <AppBar position="static">
         <Toolbar>
         {isAuthenticated && (
             <div>
-              <IconButton
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleMenu}
-                color="inherit"
-              >
-                <MenuBookIcon />
-              </IconButton>
-              
                 <Menu
                     id="menu-appbar"
                     anchorEl={anchorEl}
@@ -108,10 +82,43 @@ export default function NavBar() {
                 </Menu>
             </div>
           )}
+          {history.pathname !=="/"?
+            <IconButton>
+              <Link to={'/'}>
+                <HomeIcon/>
+              </Link>
+            </IconButton>
+            : null
+          }
           <Typography variant="h6" className={classes.title}>
             {history.pathname ==="/"?"HOME": history.pathname.split("/").splice(-1,1)[0].split("_").join(" ").toUpperCase()}
           </Typography>
-          <AuthenticationButton />
+          <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <MenuBookIcon />
+              </IconButton>
+          <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch 
+                  checked={isAuthenticated} 
+                  onChange={()=>
+                      logout({
+                          returnTo:window.location.origin,
+                      })
+                  } 
+                  aria-label="login switch" 
+              />
+            }
+              label={isAuthenticated ? 'Logout' : 'Login'}
+          />
+          </FormGroup>
+          {/* <AuthenticationButton /> */}
         </Toolbar>
       </AppBar>
     </div>

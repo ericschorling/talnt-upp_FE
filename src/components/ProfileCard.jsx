@@ -72,7 +72,6 @@ const ProfileCard = () => {
             </Grid>
         </Card>
       </Container>
-      <ProfileUpdateForm />
       </>
   );
 };

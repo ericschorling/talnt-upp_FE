@@ -32,6 +32,7 @@ export default function TMInfoCard(props) {
   const {activeTM, cNotes, rNotes} = props
 
   return (
+    
     <Card className={classes.root}>
       <CardContent className={classes.details}>
       <div className={classes.column}/>

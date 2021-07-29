@@ -21,12 +21,12 @@ export default function FactorSelector(props) {
   const classes = useStyles();
   
   const [value] = useContext(StateContext)
-  const {talentCategories} = value
-  const [talent, setTalent] = useState('')
-
+  const [type, setType] = useState('')
+  
   const handleChange = (event) => {
-    props.getFactor(event.target.value)
-    setTalent(event.target.value)
+    props.updateType(event.target.value.split("_")[0])
+    setType(event.target.value)
+    props.setTemplate(event.target.value.split("_")[1]-1)
   };
 
   return (
@@ -38,7 +38,7 @@ export default function FactorSelector(props) {
         <Select
           labelId="talent-selector-label"
           id="talent-selector"
-          value={talent}
+          value={type}
           onChange={(e)=>handleChange(e)}
           displayEmpty
           className={classes.selectEmpty}
@@ -47,8 +47,10 @@ export default function FactorSelector(props) {
           <MenuItem disabled value="">
             <em>--</em>
           </MenuItem>
-          {props.factors.map((factor, index)=>(
-              <MenuItem value={factor} key={index}>{factor}</MenuItem>
+          {props.types.map((talent, index)=>(
+              <MenuItem value={talent} key={index}>
+                {talent.split('_')[0]}
+              </MenuItem>
           ))}
         </Select>
         <FormHelperText>Performance Factors</FormHelperText>

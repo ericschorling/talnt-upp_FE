@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react'
 import {useParams} from 'react-router-dom'
 import Typography from '@material-ui/core/Typography';
+import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid'
 import CoachingView from './CoachingView'
@@ -9,7 +10,14 @@ import RecognitionView from './RecognitionView';
 import {StateContext} from '../context'
 
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    maxHeight:"100vh"
+  },
+}));
+
 export default function TMView() {
+    const classes = useStyles()
     const {tmName} = useParams()
     const serverUrl = process.env.REACT_APP_SERVER_URL;
     const [activeTM, setActiveTM] = useState({})
@@ -36,7 +44,7 @@ export default function TMView() {
   },[setActiveTM]);
   console.log(value.user.name)
     return (
-      <Container maxWidth="md" style={{marginTop:"10px"}}>
+      <Container className={classes.root} maxWidth="md" style={{marginTop:"10px"}}>
         <Typography 
             component="div" 
             style={{

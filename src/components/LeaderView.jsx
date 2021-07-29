@@ -18,13 +18,13 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
-import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import Button from '@material-ui/core/Button'
 import { StateContext } from '../context';
 import CoachingModal from './CoachingModal'
 import {Link} from 'react-router-dom'
 import Container from '@material-ui/core/Container'
+import DescriptionIcon from '@material-ui/icons/Description';
 
 
 
@@ -56,10 +56,12 @@ function stableSort(array, comparator) {
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Full Name' },
-  { id: 'department', numeric: true, disablePadding: false, label: 'Department' },
-  { id: 'coaching', numeric: true, disablePadding: false, label: 'Coachings' },
-  { id: 'step', numeric: true, disablePadding: false, label: 'Step' },
-  { id: 'recognition', numeric: true, disablePadding: false, label: 'Recognitions' },
+  { id: 'department', numeric: false, disablePadding: false, label: 'Department' },
+  { id: 'productivity', numeric: false, disablePadding: false, label: 'Productivity' },
+  { id: 'quality', numeric: false, disablePadding: false, label: 'Quality' },
+  { id: 'coaching', numeric: false, disablePadding: false, label: 'Coachings' },
+  { id: 'step', numeric: false, disablePadding: false, label: 'Step' },
+  { id: 'recognition', numeric: false, disablePadding: false, label: 'Recognitions' },
   { id: 'view', numeric: true, disablePadding: false, label: 'TM view' },
 ];
 
@@ -68,6 +70,7 @@ function EnhancedTableHead(props) {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
+  
 
   return (
     <TableHead>
@@ -135,17 +138,24 @@ const useToolbarStyles = makeStyles((theme) => ({
     flex: '1 1 100%',
   },
 }));
-
+let itsdense = false
 const EnhancedTableToolbar = (props) => {
   const classes = useToolbarStyles();
   const { numSelected } = props;
   const [value] = useContext(StateContext)
+  const [dense, setDense] = React.useState(false);
+  const handleChangeDense = (event) => {
+    setDense(event.target.checked);
+    itsdense = event.target.checked;
+    console.log(itsdense)
+  };
   return (
     <Toolbar
       className={clsx(classes.root, {
         [classes.highlight]: numSelected > 0,
       })}
     >
+      
       {numSelected > 0 ? (
         <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
           {numSelected} selected
@@ -154,21 +164,19 @@ const EnhancedTableToolbar = (props) => {
         <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
           {value?value.user.suporg[0]:null}
         </Typography>
+        
       )}
         {/* These will need to have click events tied to them to get any actual changes. They refer to the delete and filter on the leader view */}
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton aria-label="delete">
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Filter list">
-          <IconButton aria-label="filter list">
-            <FilterListIcon />
-          </IconButton>
-        </Tooltip>
-      )}
+      
+      <Tooltip title="Filter list">
+        <IconButton aria-label="filter list">
+          <FilterListIcon />
+        </IconButton>
+      </Tooltip>
+      <FormControlLabel
+                control={<Switch checked={dense} onChange={handleChangeDense} />}
+                label="Shrink"
+      />
     </Toolbar>
   );
 };
@@ -208,11 +216,10 @@ export default function LeaderView(props) {
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([])
-  function createData(name, tmNum, department, coaching, step, recognition) {
-    return { name, tmNum, department, coaching, step, recognition };
+  function createData(name, tmNum, department, productivity, quality, coaching, step, recognition) {
+    return { name, tmNum, department, productivity, quality, coaching, step, recognition };
   }
   const getNotes = async(id)=>{
     const response = await fetch(`${serverUrl}/api/notes/${id}`)
@@ -240,7 +247,7 @@ export default function LeaderView(props) {
                 }
             })
             therows = [...therows, 
-                createData(tm.name, tm.id, tm.department, coachingNotes, tm.step, recognitionNotes)]
+                createData(tm.name, tm.id, tm.department, tm.productivity, tm.quality, coachingNotes, tm.step, recognitionNotes)]
             allNotes = [...allNotes, notes]
         }
         console.log(rows)
@@ -298,9 +305,7 @@ export default function LeaderView(props) {
     setPage(0);
   };
 
-  const handleChangeDense = (event) => {
-    setDense(event.target.checked);
-  };
+  
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
@@ -319,7 +324,7 @@ export default function LeaderView(props) {
                 <Table
                     className={classes.table}
                     aria-labelledby="tableTitle"
-                    size={dense ? 'small' : 'medium'}
+                    size={itsdense ? 'small' : 'medium'}
                     aria-label="enhanced table"
                 >
                     <EnhancedTableHead
@@ -356,13 +361,28 @@ export default function LeaderView(props) {
                             <TableCell component="th" id={labelId} scope="row" padding="none">
                                 {row.name}
                             </TableCell>
-                            <TableCell align="right">{row.department}</TableCell>
-                            <TableCell align="right">
+                            <TableCell align="left">
+                              {row.department}
+                            </TableCell>
+                            <TableCell align="center">
+                              {row.productivity}
+                            </TableCell>
+                            <TableCell align="center">
+                              {row.quality}
+                            </TableCell>
+                            <TableCell align="center">
                                 {row.coaching}
                                 <CoachingModal updateRows={getRows} type='Coaching' button={'announcement'} tm={row.tmNum} />
                             </TableCell>
-                            <TableCell align="right">{row.step}</TableCell>
-                            <TableCell align="right">
+                            <TableCell align="left">
+                              {row.step}
+                              <Link to={`/step/${row.tmNum}`}>    
+                                <IconButton>
+                                  <DescriptionIcon />
+                                </IconButton>
+                              </Link>
+                            </TableCell>
+                            <TableCell align="center">
                                 {row.recognition}
                                 <CoachingModal updateRows={getRows}  type='Recognition' button={'announcement'} tm={row.tmNum} />
                             </TableCell>
@@ -376,16 +396,18 @@ export default function LeaderView(props) {
                                   </Button>
                                 </Link>
                             </TableCell>
+                            
                             </TableRow>
                         );
                         })}
                     {emptyRows > 0 && (
-                        <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
+                        <TableRow style={{ height: (itsdense ? 33 : 53) * emptyRows }}>
                         <TableCell colSpan={6} />
                         </TableRow>
                     )}
                     </TableBody>
                 </Table>
+                
                 </TableContainer>
                 <TablePagination
                     rowsPerPageOptions={[5, 10, 25, 50, {value:200,label:'All'}]}
@@ -397,10 +419,6 @@ export default function LeaderView(props) {
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                 />
             </Paper>
-            <FormControlLabel
-                control={<Switch checked={dense} onChange={handleChangeDense} />}
-                label="Dense padding"
-            />
         </div>        
     </Container>
   );
