@@ -36,7 +36,7 @@ const HomeScreen = () => {
                 <Grid container direction="row" justify="space-evenly" alignItems="center">
                     <Grid justify="center" direction="row" item xs = {12}>
                         <Typography variant="h1">
-                            TaLnt-Upp
+                            Talent-Upp
                         </Typography>
                     </Grid>
                     <Grid item xs={12}>
